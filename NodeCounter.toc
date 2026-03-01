@@ -1,0 +1,14 @@
+## Interface: 20504
+## Title: NodeCounter
+## Notes: Track herbs & ores on minimap, count harvests by type/zone, set objectives, skill cap alerts
+## Author: NodeCounter
+## Version: 1.0.0
+## SavedVariables: NodeCounterDB
+
+Core.lua
+GuideData.lua
+RoutesData.lua
+Tracking.lua
+Counter.lua
+Routes.lua
+UI.lua
