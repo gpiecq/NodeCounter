@@ -88,8 +88,8 @@ end
 ----------------------------------------------------------------------
 -- Start tracking on a route
 ----------------------------------------------------------------------
-function Routes:StartRoute(zoneKey, routeType)
-    if not self:ZoneHasRoute(zoneKey, routeType) then return false end
+function Routes:StartRoute(zoneKey, routeType, skipValidation)
+    if not skipValidation and not self:ZoneHasRoute(zoneKey, routeType) then return false end
 
     activeZoneKey = zoneKey
     activeType    = routeType

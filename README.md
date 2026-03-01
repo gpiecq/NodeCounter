@@ -1,6 +1,6 @@
 # NodeCounter
 
-A World of Warcraft TBC Classic (2.5.4) addon for tracking gathering professions. Count your herb and ore harvests, set objectives, follow optimized farming routes, and level your professions with the built-in guide.
+A World of Warcraft TBC Classic (2.5.5) addon for tracking gathering professions. Count your herb and ore harvests, set objectives, follow optimized farming routes, and level your professions with the built-in guide.
 
 ## Features
 
@@ -21,14 +21,25 @@ A World of Warcraft TBC Classic (2.5.4) addon for tracking gathering professions
 - Skill cap warnings when you need to train the next rank
 - Multi-language support (EN, FR, DE, ES)
 
-### Routes (51 zone maps)
+### Routes
+Two browsing modes with 150+ route maps:
+
+**Zone Mode** (51 zone maps)
 - Visual farming route maps overlaid on zone maps
-- Player position dot tracking in real-time
-- Browse all zones with prev/next navigation
-- Auto-detect current zone
-- Start/Stop navigation with coordinate display
+- Browse all zones with prev/next navigation or dropdown
+- Filter by Herbs or Mining sub-tab
 - **Classic zones** (1-300): 19 herbalism + 21 mining routes
 - **TBC Outland zones** (300-375): 5 herbalism + 6 mining routes
+
+**Resource Mode** (100+ farming maps)
+- Browse routes by specific resource (e.g. Dreamfoil, Thorium Ore)
+- Multiple zone options per resource with sub-navigation
+- 22 herb resources and 7 ore resources with dedicated maps
+
+**Navigation**
+- Player position dot tracking in real-time
+- Auto-detect current zone
+- Start/Stop navigation with coordinate display
 
 ### Leveling Guide
 - Complete skill brackets from **1 to 375** (Classic + TBC)
@@ -68,15 +79,17 @@ A World of Warcraft TBC Classic (2.5.4) addon for tracking gathering professions
 
 | File | Description |
 |------|-------------|
-| `NodeCounter.toc` | Addon manifest (Interface 20504) |
+| `NodeCounter.toc` | Addon manifest (Interface 20505) |
 | `Core.lua` | Initialization, SavedVariables, event bus, slash commands |
 | `Tracking.lua` | Minimap tracking toggle and auto-switch |
 | `Counter.lua` | Harvest detection, bag scanning, skill monitoring |
 | `GuideData.lua` | Leveling guide data (skill brackets 1-375) |
-| `RoutesData.lua` | Route map definitions and zone aliases |
+| `RoutesData.lua` | Route map definitions, zone aliases, localization tables |
+| `FarmingData.lua` | Per-resource farming route data (herbs and ores) |
 | `Routes.lua` | Navigation engine (player position tracking) |
 | `UI.lua` | All UI: minimap button, main window, settings, guide |
-| `textures/` | Route map images (TGA 512x256 32-bit) |
+| `textures/` | Zone route maps (TGA 512x256 32-bit) |
+| `textures/farming/` | Per-resource farming route maps |
 
 ## Localization
 
@@ -84,13 +97,16 @@ The addon supports multiple languages through:
 - **Spell detection**: Uses spell IDs (language-independent)
 - **Tracking/skill names**: Multi-language lookup tables (EN/FR/DE/ES)
 - **Zone detection**: Localized zone name aliases for route matching
+- **Zone display**: Reverse locale tables (EN/FR/DE) for translated zone names in the UI
+- **Resource display**: Localized herb and ore names (FR) in the Routes resource browser
 - **Node/item names**: Stored as-is from the client
 
 ## Compatibility
 
-- **Interface**: 20504 (TBC Classic 2.5.5)
+- **Interface**: 20505 (TBC Classic 2.5.5)
 - **ElvUI**: Detected and supported (uses `SetTemplate("Transparent")` for frames)
 - **Container API**: Supports both legacy `GetContainerItemInfo` and `C_Container` API
+- **Tracking API**: Supports both legacy `GetTrackingInfo` and `C_Minimap` API
 
 ## Credits & Sources
 

@@ -15,12 +15,14 @@ jobs:
         run: |
           ADDON_NAME="NodeCounter"
           mkdir -p "build/$ADDON_NAME/textures"
+          mkdir -p "build/$ADDON_NAME/textures/farming"
 
-          cp NodeCounter.toc Core.lua GuideData.lua RoutesData.lua Tracking.lua \
+          cp NodeCounter.toc Core.lua GuideData.lua RoutesData.lua FarmingData.lua Tracking.lua \
              Counter.lua Routes.lua UI.lua README.md \
              "build/$ADDON_NAME/"
 
           cp textures/*.tga "build/$ADDON_NAME/textures/"
+          cp textures/farming/*.tga "build/$ADDON_NAME/textures/farming/"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

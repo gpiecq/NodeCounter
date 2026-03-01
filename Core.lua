@@ -19,6 +19,7 @@ local DEFAULTS = {
         skillCapWarning = true,
         routes = {
             lastType = "herbs",    -- last selected route sub-tab
+            browseMode = "zone",   -- "zone" or "resource"
         },
         guide = {
             lastType = "herbs",    -- last selected guide sub-tab

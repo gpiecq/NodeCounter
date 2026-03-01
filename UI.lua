@@ -378,7 +378,7 @@ end
 ----------------------------------------------------------------------
 local function CreateMainFrame()
     local f = CreateFrame("Frame", "NodeCounterMainFrame", UIParent, "BackdropTemplate")
-    f:SetSize(420, 470)
+    f:SetSize(520, 560)
     f:SetPoint("CENTER")
     f:SetFrameStrata("HIGH")
     f:SetMovable(true)
@@ -619,6 +619,11 @@ local function CreateMainFrame()
     local currentRouteZone  = nil  -- currently displayed zone key
     local currentRouteIdx   = 1    -- index in NS.RouteZoneList
 
+    -- Resource browse mode state
+    local routeBrowseMode       = "zone"   -- "zone" or "resource"
+    local currentResourceIdx    = 1        -- index in FarmingHerbList/FarmingMiningList
+    local currentResourceZoneIdx = 1       -- index in the zones of the current resource
+
     -- Sub-tab buttons (Herbes / Minage)
     local routeHerbBtn = CreateFrame("Button", nil, routeContainer)
     routeHerbBtn:SetSize(100, 24)
@@ -653,10 +658,70 @@ local function CreateMainFrame()
         end
     end
 
+    -- Browse mode toggle buttons (Par zone / Par ressource)
+    local browseZoneBtn = CreateFrame("Button", nil, routeContainer)
+    browseZoneBtn:SetSize(110, 22)
+    browseZoneBtn:SetPoint("TOPLEFT", routeHerbBtn, "BOTTOMLEFT", 0, -8)
+    SkinFrame(browseZoneBtn)
+    browseZoneBtn.label = browseZoneBtn:CreateFontString(nil, "OVERLAY")
+    browseZoneBtn.label:SetFont(GetFont(), 9, "OUTLINE")
+    browseZoneBtn.label:SetPoint("CENTER")
+    browseZoneBtn.label:SetText("Par zone")
+
+    local browseResBtn = CreateFrame("Button", nil, routeContainer)
+    browseResBtn:SetSize(110, 22)
+    browseResBtn:SetPoint("LEFT", browseZoneBtn, "RIGHT", 4, 0)
+    SkinFrame(browseResBtn)
+    browseResBtn.label = browseResBtn:CreateFontString(nil, "OVERLAY")
+    browseResBtn.label:SetFont(GetFont(), 9, "OUTLINE")
+    browseResBtn.label:SetPoint("CENTER")
+    browseResBtn.label:SetText("Par ressource")
+
+    local function UpdateBrowseModeButtons()
+        if routeBrowseMode == "zone" then
+            browseZoneBtn:SetBackdropBorderColor(unpack(COLOURS.accent))
+            browseZoneBtn.label:SetTextColor(unpack(COLOURS.accent))
+            browseResBtn:SetBackdropBorderColor(unpack(COLOURS.border))
+            browseResBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+        else
+            browseZoneBtn:SetBackdropBorderColor(unpack(COLOURS.border))
+            browseZoneBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+            browseResBtn:SetBackdropBorderColor(unpack(COLOURS.accent))
+            browseResBtn.label:SetTextColor(unpack(COLOURS.accent))
+        end
+    end
+
+    -- Resource zone sub-navigation (shown in resource mode)
+    local resZonePrevBtn = CreateFrame("Button", nil, routeContainer)
+    resZonePrevBtn:SetSize(16, 16)
+    SkinFrame(resZonePrevBtn)
+    resZonePrevBtn.label = resZonePrevBtn:CreateFontString(nil, "OVERLAY")
+    resZonePrevBtn.label:SetFont(GetFont(), 10, "OUTLINE")
+    resZonePrevBtn.label:SetPoint("CENTER")
+    resZonePrevBtn.label:SetText("<")
+    resZonePrevBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+    resZonePrevBtn:Hide()
+
+    local resZoneNextBtn = CreateFrame("Button", nil, routeContainer)
+    resZoneNextBtn:SetSize(16, 16)
+    SkinFrame(resZoneNextBtn)
+    resZoneNextBtn.label = resZoneNextBtn:CreateFontString(nil, "OVERLAY")
+    resZoneNextBtn.label:SetFont(GetFont(), 10, "OUTLINE")
+    resZoneNextBtn.label:SetPoint("CENTER")
+    resZoneNextBtn.label:SetText(">")
+    resZoneNextBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+    resZoneNextBtn:Hide()
+
+    local resZoneNameText = routeContainer:CreateFontString(nil, "OVERLAY")
+    resZoneNameText:SetFont(GetFont(), 9, "")
+    resZoneNameText:SetJustifyH("CENTER")
+    resZoneNameText:SetTextColor(unpack(COLOURS.dimWhite))
+    resZoneNameText:Hide()
+
     -- Zone navigation: zone name + prev/next arrows
     local zonePrevBtn = CreateFrame("Button", nil, routeContainer)
     zonePrevBtn:SetSize(20, 20)
-    zonePrevBtn:SetPoint("TOPLEFT", routeHerbBtn, "BOTTOMLEFT", 0, -4)
+    zonePrevBtn:SetPoint("TOPLEFT", browseZoneBtn, "BOTTOMLEFT", 0, -8)
     SkinFrame(zonePrevBtn)
     zonePrevBtn.label = zonePrevBtn:CreateFontString(nil, "OVERLAY")
     zonePrevBtn.label:SetFont(GetFont(), 12, "OUTLINE")
@@ -666,7 +731,7 @@ local function CreateMainFrame()
 
     local zoneNextBtn = CreateFrame("Button", nil, routeContainer)
     zoneNextBtn:SetSize(20, 20)
-    zoneNextBtn:SetPoint("TOP", routeHerbBtn, "BOTTOM", 0, -4)
+    zoneNextBtn:SetPoint("TOP", browseZoneBtn, "BOTTOM", 0, -8)
     zoneNextBtn:SetPoint("RIGHT", routeContainer, "RIGHT", -6, 0)
     SkinFrame(zoneNextBtn)
     zoneNextBtn.label = zoneNextBtn:CreateFontString(nil, "OVERLAY")
@@ -762,9 +827,205 @@ local function CreateMainFrame()
     f.routeStopBtn  = stopBtn
 
     -------------------------------------------------------------------
-    -- Zone navigation helpers
+    -- Custom dropdown frame (reusable for zone/resource selection)
     -------------------------------------------------------------------
-    -- Build a filtered zone list for the current sub-tab
+    local dropdownFrame = CreateFrame("Frame", nil, routeContainer, "BackdropTemplate")
+    dropdownFrame:SetFrameStrata("TOOLTIP")
+    dropdownFrame:SetSize(260, 40)
+    SkinFrame(dropdownFrame)
+    dropdownFrame:Hide()
+
+    -- Click-outside overlay to close dropdown
+    local dropdownOverlay = CreateFrame("Frame", nil, UIParent)
+    dropdownOverlay:SetAllPoints(UIParent)
+    dropdownOverlay:SetFrameStrata("TOOLTIP")
+    dropdownOverlay:SetFrameLevel(dropdownFrame:GetFrameLevel() - 1)
+    dropdownOverlay:EnableMouse(true)
+    dropdownOverlay:SetScript("OnMouseDown", function()
+        dropdownFrame:Hide()
+    end)
+    dropdownOverlay:Hide()
+
+    -- Ensure overlay hides when dropdown hides
+    dropdownFrame:SetScript("OnHide", function()
+        dropdownOverlay:Hide()
+    end)
+
+    -- Scroll frame inside dropdown
+    local dropScroll = CreateFrame("ScrollFrame", nil, dropdownFrame, "UIPanelScrollFrameTemplate")
+    dropScroll:SetPoint("TOPLEFT", 4, -4)
+    dropScroll:SetPoint("BOTTOMRIGHT", -22, 4)
+
+    local dropContent = CreateFrame("Frame", nil, dropScroll)
+    dropContent:SetSize(230, 1)
+    dropScroll:SetScrollChild(dropContent)
+
+    -- Pool of item buttons
+    local dropdownItems = {}
+    local DROPDOWN_ITEM_H = 20
+    local DROPDOWN_MAX_VISIBLE = 10
+
+    local function GetOrCreateDropdownItem(idx)
+        if dropdownItems[idx] then return dropdownItems[idx] end
+
+        local item = CreateFrame("Button", nil, dropContent)
+        item:SetHeight(DROPDOWN_ITEM_H)
+        item:SetPoint("TOPLEFT", dropContent, "TOPLEFT", 0, -(idx - 1) * DROPDOWN_ITEM_H)
+        item:SetPoint("RIGHT", dropContent, "RIGHT", 0, 0)
+
+        -- Hover highlight
+        local hl = item:CreateTexture(nil, "BACKGROUND")
+        hl:SetAllPoints()
+        hl:SetTexture("Interface\\Buttons\\WHITE8x8")
+        hl:SetVertexColor(unpack(COLOURS.rowHover))
+        hl:Hide()
+        item.hl = hl
+
+        -- Main label (left)
+        item.label = item:CreateFontString(nil, "OVERLAY")
+        item.label:SetFont(GetFont(), 10, "")
+        item.label:SetPoint("LEFT", 6, 0)
+        item.label:SetJustifyH("LEFT")
+        item.label:SetTextColor(1, 1, 1)
+
+        -- Sub label (right)
+        item.subLabel = item:CreateFontString(nil, "OVERLAY")
+        item.subLabel:SetFont(GetFont(), 9, "")
+        item.subLabel:SetPoint("RIGHT", -6, 0)
+        item.subLabel:SetJustifyH("RIGHT")
+        item.subLabel:SetTextColor(unpack(COLOURS.dimWhite))
+
+        item:SetScript("OnEnter", function(self)
+            self.hl:Show()
+        end)
+        item:SetScript("OnLeave", function(self)
+            self.hl:Hide()
+        end)
+
+        dropdownItems[idx] = item
+        return item
+    end
+
+    local function HideDropdown()
+        dropdownFrame:Hide()
+        dropdownOverlay:Hide()
+    end
+
+    local function ShowDropdown(anchorFrame, items, selectedIdx, onSelect)
+        -- items = { { label="...", subLabel="...", idx=N }, ... }
+        if not items or #items == 0 then return end
+
+        HideDropdown()
+
+        local count = #items
+        local visibleCount = math.min(count, DROPDOWN_MAX_VISIBLE)
+        local totalH = visibleCount * DROPDOWN_ITEM_H + 8
+
+        dropdownFrame:SetHeight(totalH)
+        dropContent:SetHeight(count * DROPDOWN_ITEM_H)
+
+        -- Populate items
+        for i, data in ipairs(items) do
+            local item = GetOrCreateDropdownItem(i)
+            item:ClearAllPoints()
+            item:SetPoint("TOPLEFT", dropContent, "TOPLEFT", 0, -(i - 1) * DROPDOWN_ITEM_H)
+            item:SetPoint("RIGHT", dropContent, "RIGHT", 0, 0)
+            item.label:SetText(data.label or "")
+            item.subLabel:SetText(data.subLabel or "")
+
+            -- Highlight selected
+            if i == selectedIdx then
+                item.label:SetTextColor(unpack(COLOURS.accent))
+                item.subLabel:SetTextColor(unpack(COLOURS.accent))
+            else
+                item.label:SetTextColor(1, 1, 1)
+                item.subLabel:SetTextColor(unpack(COLOURS.dimWhite))
+            end
+
+            item:SetScript("OnClick", function()
+                HideDropdown()
+                if onSelect then onSelect(data.idx or i) end
+            end)
+            item:Show()
+        end
+
+        -- Hide excess items
+        for i = count + 1, #dropdownItems do
+            dropdownItems[i]:Hide()
+        end
+
+        -- Anchor below the text
+        dropdownFrame:ClearAllPoints()
+        dropdownFrame:SetPoint("TOP", anchorFrame, "BOTTOM", 0, -2)
+
+        -- Adjust width to match routeContainer
+        local containerW = routeContainer:GetWidth() - 12
+        dropdownFrame:SetWidth(containerW)
+        dropContent:SetWidth(containerW - 26)
+
+        dropScroll:SetVerticalScroll(0)
+        dropdownOverlay:Show()
+        dropdownFrame:Show()
+    end
+
+    -- Close dropdown on Escape (hook into main frame ESC)
+    dropdownFrame:SetScript("OnKeyDown", function(self, key)
+        if key == "ESCAPE" then
+            HideDropdown()
+            self:SetPropagateKeyboardInput(false)
+        else
+            self:SetPropagateKeyboardInput(true)
+        end
+    end)
+    dropdownFrame:EnableKeyboard(true)
+
+    -- Clickable overlay for zoneNameText (main navigation label)
+    local zoneNameBtn = CreateFrame("Button", nil, routeContainer)
+    zoneNameBtn:SetPoint("LEFT", zonePrevBtn, "RIGHT", 4, 0)
+    zoneNameBtn:SetPoint("RIGHT", zoneNextBtn, "LEFT", -4, 0)
+    zoneNameBtn:SetHeight(20)
+    zoneNameBtn:SetFrameLevel(routeContainer:GetFrameLevel() + 5)
+
+    -- Dropdown arrow indicator for zone name
+    local zoneDropArrow = routeContainer:CreateFontString(nil, "OVERLAY")
+    zoneDropArrow:SetFont(GetFont(), 8, "OUTLINE")
+    zoneDropArrow:SetText("v")
+    zoneDropArrow:SetTextColor(unpack(COLOURS.dimWhite))
+
+    zoneNameBtn:SetScript("OnEnter", function()
+        zoneNameText:SetTextColor(unpack(COLOURS.routeCyan))
+        zoneDropArrow:SetTextColor(unpack(COLOURS.routeCyan))
+    end)
+    zoneNameBtn:SetScript("OnLeave", function()
+        zoneNameText:SetTextColor(unpack(COLOURS.accent))
+        zoneDropArrow:SetTextColor(unpack(COLOURS.dimWhite))
+    end)
+
+    -- Clickable overlay for resZoneNameText (resource mode zone sub-nav)
+    local resZoneNameBtn = CreateFrame("Button", nil, routeContainer)
+    resZoneNameBtn:SetHeight(16)
+    resZoneNameBtn:SetFrameLevel(routeContainer:GetFrameLevel() + 5)
+    resZoneNameBtn:Hide()
+
+    -- Dropdown arrow indicator for resource zone name
+    local resZoneDropArrow = routeContainer:CreateFontString(nil, "OVERLAY")
+    resZoneDropArrow:SetFont(GetFont(), 7, "OUTLINE")
+    resZoneDropArrow:SetText("v")
+    resZoneDropArrow:SetTextColor(unpack(COLOURS.dimWhite))
+    resZoneDropArrow:Hide()
+
+    resZoneNameBtn:SetScript("OnEnter", function()
+        resZoneNameText:SetTextColor(unpack(COLOURS.routeCyan))
+        resZoneDropArrow:SetTextColor(unpack(COLOURS.routeCyan))
+    end)
+    resZoneNameBtn:SetScript("OnLeave", function()
+        resZoneNameText:SetTextColor(unpack(COLOURS.dimWhite))
+        resZoneDropArrow:SetTextColor(unpack(COLOURS.dimWhite))
+    end)
+
+    -------------------------------------------------------------------
+    -- Zone navigation helpers (zone mode)
+    -------------------------------------------------------------------
     local function GetFilteredZoneList()
         local list = {}
         for _, key in ipairs(NS.RouteZoneList) do
@@ -782,36 +1043,148 @@ local function CreateMainFrame()
         return 1
     end
 
+    -------------------------------------------------------------------
+    -- Resource browse helpers
+    -------------------------------------------------------------------
+    local function GetCurrentFarmingList()
+        if activeRouteSubTab == "herbs" then
+            return NS.FarmingHerbList or {}
+        else
+            return NS.FarmingMiningList or {}
+        end
+    end
+
+    local function GetCurrentFarmingEntry()
+        local list = GetCurrentFarmingList()
+        if #list == 0 then return nil end
+        if currentResourceIdx < 1 then currentResourceIdx = 1 end
+        if currentResourceIdx > #list then currentResourceIdx = #list end
+        local dataIdx = list[currentResourceIdx]
+        return NS.FarmingData and NS.FarmingData[dataIdx] or nil
+    end
+
+    -------------------------------------------------------------------
+    -- Unified display update
+    -------------------------------------------------------------------
     local function UpdateRouteDisplay()
-        if not currentRouteZone then
-            mapTex:SetTexture(nil)
-            noRouteText:Show()
-            zoneNameText:SetText("--")
-            skillRangeText:SetText("")
-            return
-        end
+        HideDropdown()
 
-        noRouteText:Hide()
-        zoneNameText:SetText(currentRouteZone)
+        if routeBrowseMode == "resource" then
+            -- Resource mode: show resource name in main nav, zone in sub-nav
+            resZonePrevBtn:Show()
+            resZoneNextBtn:Show()
+            resZoneNameText:Show()
+            resZoneNameBtn:Show()
+            resZoneDropArrow:Show()
 
-        local zd = NS.RoutesData[currentRouteZone]
-        if zd and zd.skillRange then
-            local factionStr = ""
-            if zd.faction == "horde" then factionStr = " |cffff4444(Horde)|r"
-            elseif zd.faction == "alliance" then factionStr = " |cff4444ff(Alliance)|r"
+            local entry = GetCurrentFarmingEntry()
+            if not entry then
+                mapTex:SetTexture(nil)
+                noRouteText:Show()
+                zoneNameText:SetText("--")
+                skillRangeText:SetText("")
+                resZoneNameText:SetText("")
+                resZoneNameBtn:Hide()
+                resZoneDropArrow:Hide()
+                zoneDropArrow:ClearAllPoints()
+                zoneDropArrow:SetPoint("LEFT", zoneNameText, "RIGHT", 2, 0)
+                zoneDropArrow:Show()
+                return
             end
-            skillRangeText:SetText("Skill " .. zd.skillRange .. factionStr)
-        else
-            skillRangeText:SetText("")
-        end
 
-        local tex = NS.Routes:GetTexture(currentRouteZone, activeRouteSubTab)
-        if tex then
-            mapTex:SetTexture(tex)
             noRouteText:Hide()
+            zoneNameText:SetText(NS.LocalizeResource(entry.name))
+            skillRangeText:SetText("Skill " .. entry.skillRange)
+
+            -- Position dropdown arrow for zone name
+            zoneDropArrow:ClearAllPoints()
+            zoneDropArrow:SetPoint("LEFT", zoneNameText, "RIGHT", 2, 0)
+            zoneDropArrow:Show()
+
+            -- Anchor sub-nav elements next to skillRangeText
+            resZonePrevBtn:ClearAllPoints()
+            resZonePrevBtn:SetPoint("LEFT", skillRangeText, "RIGHT", 10, 0)
+            resZoneNextBtn:ClearAllPoints()
+            resZoneNameText:ClearAllPoints()
+
+            local zones = entry.zones
+            if not zones or #zones == 0 then
+                mapTex:SetTexture(nil)
+                noRouteText:Show()
+                resZoneNameText:SetText("")
+                resZoneNameBtn:Hide()
+                resZoneDropArrow:Hide()
+                return
+            end
+
+            if currentResourceZoneIdx < 1 then currentResourceZoneIdx = 1 end
+            if currentResourceZoneIdx > #zones then currentResourceZoneIdx = #zones end
+
+            local zoneEntry = zones[currentResourceZoneIdx]
+            resZoneNameText:SetText(NS.LocalizeZone(zoneEntry.zone) .. " (" .. currentResourceZoneIdx .. "/" .. #zones .. ")")
+            resZoneNameText:SetPoint("LEFT", resZonePrevBtn, "RIGHT", 4, 0)
+            resZoneNextBtn:SetPoint("LEFT", resZoneNameText, "RIGHT", 4, 0)
+
+            -- Position resZone dropdown button and arrow
+            resZoneNameBtn:ClearAllPoints()
+            resZoneNameBtn:SetPoint("LEFT", resZonePrevBtn, "RIGHT", 4, 0)
+            resZoneNameBtn:SetPoint("RIGHT", resZoneNextBtn, "LEFT", -4, 0)
+            resZoneDropArrow:ClearAllPoints()
+            resZoneDropArrow:SetPoint("LEFT", resZoneNameText, "RIGHT", 2, 0)
+
+            if zoneEntry.texture then
+                mapTex:SetTexture(zoneEntry.texture)
+                noRouteText:Hide()
+            else
+                mapTex:SetTexture(nil)
+                noRouteText:Show()
+            end
         else
-            mapTex:SetTexture(nil)
-            noRouteText:Show()
+            -- Zone mode: hide resource sub-nav
+            resZonePrevBtn:Hide()
+            resZoneNextBtn:Hide()
+            resZoneNameText:Hide()
+            resZoneNameBtn:Hide()
+            resZoneDropArrow:Hide()
+
+            if not currentRouteZone then
+                mapTex:SetTexture(nil)
+                noRouteText:Show()
+                zoneNameText:SetText("--")
+                skillRangeText:SetText("")
+                zoneDropArrow:ClearAllPoints()
+                zoneDropArrow:SetPoint("LEFT", zoneNameText, "RIGHT", 2, 0)
+                zoneDropArrow:Show()
+                return
+            end
+
+            noRouteText:Hide()
+            zoneNameText:SetText(NS.LocalizeZone(currentRouteZone))
+
+            -- Position dropdown arrow for zone name
+            zoneDropArrow:ClearAllPoints()
+            zoneDropArrow:SetPoint("LEFT", zoneNameText, "RIGHT", 2, 0)
+            zoneDropArrow:Show()
+
+            local zd = NS.RoutesData[currentRouteZone]
+            if zd and zd.skillRange then
+                local factionStr = ""
+                if zd.faction == "horde" then factionStr = " |cffff4444(Horde)|r"
+                elseif zd.faction == "alliance" then factionStr = " |cff4444ff(Alliance)|r"
+                end
+                skillRangeText:SetText("Skill " .. zd.skillRange .. factionStr)
+            else
+                skillRangeText:SetText("")
+            end
+
+            local tex = NS.Routes:GetTexture(currentRouteZone, activeRouteSubTab)
+            if tex then
+                mapTex:SetTexture(tex)
+                noRouteText:Hide()
+            else
+                mapTex:SetTexture(nil)
+                noRouteText:Show()
+            end
         end
     end
 
@@ -821,29 +1194,155 @@ local function CreateMainFrame()
     end
 
     local function NavigateZone(delta)
-        local list = GetFilteredZoneList()
-        if #list == 0 then return end
-        local idx = FindZoneIndex(list, currentRouteZone)
-        idx = idx + delta
-        if idx < 1 then idx = #list end
-        if idx > #list then idx = 1 end
-        SetRouteZone(list[idx])
+        if routeBrowseMode == "resource" then
+            -- In resource mode, prev/next navigates resources
+            local list = GetCurrentFarmingList()
+            if #list == 0 then return end
+            currentResourceIdx = currentResourceIdx + delta
+            if currentResourceIdx < 1 then currentResourceIdx = #list end
+            if currentResourceIdx > #list then currentResourceIdx = 1 end
+            currentResourceZoneIdx = 1
+            UpdateRouteDisplay()
+        else
+            local list = GetFilteredZoneList()
+            if #list == 0 then return end
+            local idx = FindZoneIndex(list, currentRouteZone)
+            idx = idx + delta
+            if idx < 1 then idx = #list end
+            if idx > #list then idx = 1 end
+            SetRouteZone(list[idx])
+        end
     end
 
-    local function AutoDetectZone()
-        local zoneKey = NS.Routes:GetCurrentZoneKey()
-        if zoneKey and NS.Routes:ZoneHasRoute(zoneKey, activeRouteSubTab) then
-            SetRouteZone(zoneKey)
+    local function NavigateResourceZone(delta)
+        local entry = GetCurrentFarmingEntry()
+        if not entry or not entry.zones or #entry.zones == 0 then return end
+        currentResourceZoneIdx = currentResourceZoneIdx + delta
+        if currentResourceZoneIdx < 1 then currentResourceZoneIdx = #entry.zones end
+        if currentResourceZoneIdx > #entry.zones then currentResourceZoneIdx = 1 end
+        UpdateRouteDisplay()
+    end
+
+    -------------------------------------------------------------------
+    -- Dropdown click handlers for zone/resource names
+    -------------------------------------------------------------------
+    zoneNameBtn:SetScript("OnClick", function()
+        if routeBrowseMode == "resource" then
+            -- Show list of all resources for the active sub-tab
+            local list = GetCurrentFarmingList()
+            if #list == 0 then return end
+            local items = {}
+            for i, dataIdx in ipairs(list) do
+                local entry = NS.FarmingData and NS.FarmingData[dataIdx]
+                if entry then
+                    items[#items + 1] = {
+                        label = NS.LocalizeResource(entry.name),
+                        subLabel = entry.skillRange or "",
+                        idx = i,
+                    }
+                end
+            end
+            ShowDropdown(zoneNameBtn, items, currentResourceIdx, function(idx)
+                currentResourceIdx = idx
+                currentResourceZoneIdx = 1
+                UpdateRouteDisplay()
+            end)
         else
-            -- Show first available zone for this sub-tab
+            -- Zone mode: show all filtered zones
             local list = GetFilteredZoneList()
-            if #list > 0 then
-                SetRouteZone(list[1])
+            if #list == 0 then return end
+            local curIdx = FindZoneIndex(list, currentRouteZone)
+            local items = {}
+            for i, key in ipairs(list) do
+                local subLabel = ""
+                local zd = NS.RoutesData and NS.RoutesData[key]
+                if zd and zd.skillRange then
+                    subLabel = zd.skillRange
+                end
+                items[#items + 1] = {
+                    label = NS.LocalizeZone(key),
+                    subLabel = subLabel,
+                    idx = i,
+                }
+            end
+            ShowDropdown(zoneNameBtn, items, curIdx, function(idx)
+                SetRouteZone(list[idx])
+            end)
+        end
+    end)
+
+    resZoneNameBtn:SetScript("OnClick", function()
+        local entry = GetCurrentFarmingEntry()
+        if not entry or not entry.zones or #entry.zones == 0 then return end
+        local items = {}
+        for i, zoneEntry in ipairs(entry.zones) do
+            items[#items + 1] = {
+                label = NS.LocalizeZone(zoneEntry.zone),
+                subLabel = "(" .. i .. "/" .. #entry.zones .. ")",
+                idx = i,
+            }
+        end
+        ShowDropdown(resZoneNameBtn, items, currentResourceZoneIdx, function(idx)
+            currentResourceZoneIdx = idx
+            UpdateRouteDisplay()
+        end)
+    end)
+
+    local function AutoDetectZone()
+        if routeBrowseMode == "resource" then
+            currentResourceIdx = 1
+            currentResourceZoneIdx = 1
+            UpdateRouteDisplay()
+        else
+            local zoneKey = NS.Routes:GetCurrentZoneKey()
+            if zoneKey and NS.Routes:ZoneHasRoute(zoneKey, activeRouteSubTab) then
+                SetRouteZone(zoneKey)
             else
-                SetRouteZone(nil)
+                local list = GetFilteredZoneList()
+                if #list > 0 then
+                    SetRouteZone(list[1])
+                else
+                    SetRouteZone(nil)
+                end
             end
         end
     end
+
+    -------------------------------------------------------------------
+    -- Browse mode switching
+    -------------------------------------------------------------------
+    local function SwitchBrowseMode(mode)
+        routeBrowseMode = mode
+        if NS.db then NS.db.settings.routes.browseMode = mode end
+        UpdateBrowseModeButtons()
+
+        -- Stop navigation when switching modes
+        if NS.Routes:IsNavigating() then
+            NS.Routes:StopRoute()
+        end
+
+        if mode == "resource" then
+            currentResourceIdx = 1
+            currentResourceZoneIdx = 1
+        end
+
+        UpdateRouteDisplay()
+    end
+
+    browseZoneBtn:SetScript("OnClick", function() SwitchBrowseMode("zone") end)
+    browseResBtn:SetScript("OnClick", function() SwitchBrowseMode("resource") end)
+    browseZoneBtn:SetScript("OnEnter", function(self)
+        if routeBrowseMode ~= "zone" then self:SetBackdropColor(0.25, 0.25, 0.25, 1) end
+    end)
+    browseZoneBtn:SetScript("OnLeave", function(self)
+        if routeBrowseMode ~= "zone" then self:SetBackdropColor(unpack(COLOURS.bg)) end
+    end)
+    browseResBtn:SetScript("OnEnter", function(self)
+        if routeBrowseMode ~= "resource" then self:SetBackdropColor(0.25, 0.25, 0.25, 1) end
+    end)
+    browseResBtn:SetScript("OnLeave", function(self)
+        if routeBrowseMode ~= "resource" then self:SetBackdropColor(unpack(COLOURS.bg)) end
+    end)
 
     -------------------------------------------------------------------
     -- Sub-tab switching
@@ -861,7 +1360,13 @@ local function CreateMainFrame()
             end
         end
 
-        AutoDetectZone()
+        if routeBrowseMode == "resource" then
+            currentResourceIdx = 1
+            currentResourceZoneIdx = 1
+            UpdateRouteDisplay()
+        else
+            AutoDetectZone()
+        end
     end
 
     routeHerbBtn:SetScript("OnClick", function() SwitchRouteSubTab("herbs") end)
@@ -881,13 +1386,23 @@ local function CreateMainFrame()
 
     zonePrevBtn:SetScript("OnClick", function() NavigateZone(-1) end)
     zoneNextBtn:SetScript("OnClick", function() NavigateZone(1) end)
+    resZonePrevBtn:SetScript("OnClick", function() NavigateResourceZone(-1) end)
+    resZoneNextBtn:SetScript("OnClick", function() NavigateResourceZone(1) end)
 
     -------------------------------------------------------------------
     -- Start / Stop handlers
     -------------------------------------------------------------------
     startBtn:SetScript("OnClick", function()
-        if currentRouteZone then
-            NS.Routes:StartRoute(currentRouteZone, activeRouteSubTab)
+        if routeBrowseMode == "resource" then
+            local entry = GetCurrentFarmingEntry()
+            if entry and entry.zones and entry.zones[currentResourceZoneIdx] then
+                local zoneEntry = entry.zones[currentResourceZoneIdx]
+                NS.Routes:StartRoute(zoneEntry.zone, activeRouteSubTab, true)
+            end
+        else
+            if currentRouteZone then
+                NS.Routes:StartRoute(currentRouteZone, activeRouteSubTab)
+            end
         end
     end)
 
@@ -1301,7 +1816,7 @@ local function CreateMainFrame()
             end
 
             for _, z in ipairs(filteredZones) do
-                local zoneText = "  \194\183 " .. z.zone
+                local zoneText = "  \194\183 " .. NS.LocalizeZone(z.zone)
                 local hasRoute = isCurrent and ZoneHasRouteForGuide(z.zone, guideType)
 
                 local zoneFs = boxFrame:CreateFontString(nil, "OVERLAY")
@@ -1329,7 +1844,7 @@ local function CreateMainFrame()
                     clickBtn:SetScript("OnEnter", function(self)
                         zoneFs:SetTextColor(unpack(COLOURS.routeCyan))
                         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                        GameTooltip:AddLine("Voir la route pour " .. z.zone, 0, 0.86, 1)
+                        GameTooltip:AddLine("Voir la route pour " .. NS.LocalizeZone(z.zone), 0, 0.86, 1)
                         GameTooltip:Show()
                     end)
                     clickBtn:SetScript("OnLeave", function()
@@ -1441,9 +1956,19 @@ local function CreateMainFrame()
                 else
                     activeRouteSubTab = "herbs"
                 end
+                -- Restore browse mode
+                local bm = NS.db.settings.routes.browseMode
+                if bm == "resource" then
+                    routeBrowseMode = "resource"
+                else
+                    routeBrowseMode = "zone"
+                end
             end
             UpdateRouteSubTabs()
+            UpdateBrowseModeButtons()
             if targetRouteZone then
+                routeBrowseMode = "zone"
+                UpdateBrowseModeButtons()
                 SetRouteZone(targetRouteZone)
             else
                 AutoDetectZone()
