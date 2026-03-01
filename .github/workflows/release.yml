@@ -26,12 +26,14 @@ jobs:
         run: |
           ADDON_NAME="NodeCounter"
           mkdir -p /tmp/addon-build/$ADDON_NAME/textures
+          mkdir -p /tmp/addon-build/$ADDON_NAME/textures/farming
 
-          cp NodeCounter.toc Core.lua GuideData.lua RoutesData.lua Tracking.lua \
+          cp NodeCounter.toc Core.lua GuideData.lua RoutesData.lua FarmingData.lua Tracking.lua \
              Counter.lua Routes.lua UI.lua README.md \
              /tmp/addon-build/$ADDON_NAME/
 
           cp textures/*.tga /tmp/addon-build/$ADDON_NAME/textures/
+          cp textures/farming/*.tga /tmp/addon-build/$ADDON_NAME/textures/farming/
 
           cd /tmp/addon-build
           zip -r "$GITHUB_WORKSPACE/NodeCounter.zip" $ADDON_NAME

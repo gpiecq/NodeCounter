@@ -2,6 +2,40 @@
 
 All notable changes to NodeCounter will be documented in this file.
 
+## [1.1.0] - 2026-03-01
+
+### Added
+
+#### Resource Farming Mode (Routes Tab)
+- New **Resource browse mode** in Routes tab: browse farming routes by specific resource
+- 22 herb resources with dedicated zone maps (Peacebloom/Silverleaf through Netherbloom)
+- 7 ore resources with dedicated zone maps (Copper Ore through Adamantite Ore)
+- Sub-navigation per resource with multiple zone options
+- Resource dropdown selector with skill range display
+- `FarmingData.lua` with all resource definitions and zone-specific texture paths
+- `textures/farming/` directory with 100+ per-resource farming route maps
+
+#### Zone & Resource Localization
+- `NS.ZoneLocales` reverse lookup table (EN to localized zone names) for French (frFR) and German (deDE)
+- `NS.LocalizeZone()` helper function for translated zone names in the UI
+- `NS.ResourceLocales` table with French translations for all herb and ore names
+- `NS.LocalizeResource()` helper function for translated resource names in the UI
+- Zone names now display in the player's language across Routes tab (zone mode, resource mode, dropdowns) and Guide tab
+- Resource names now display in French on frFR clients (e.g. "Feuillereve", "Minerai de thorium")
+- Fallback to English for unsupported locales
+
+#### Build & Release
+- GitHub Actions workflow for automated builds on pull requests (`build-addon.yml`)
+- GitHub Actions workflow for automated releases on merge to main (`release.yml`)
+- `package.sh` script for local addon packaging with CurseForge/Wago/WoWInterface upload instructions
+
+### Changed
+- Interface version updated from 20504 to **20505**
+- `RoutesData.lua` now includes localization tables and helper functions
+- Routes tab UI supports dual browsing modes (zone mode + resource mode)
+
+---
+
 ## [1.0.0] - 2026-03-01
 
 ### Added

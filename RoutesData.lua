@@ -295,7 +295,177 @@ NS.RouteZoneAliases = {
     ["Schergrat"]                   = "Blade's Edge Mountains",
     ["Nethersturm"]                 = "Netherstorm",
     ["Schattenmondtal"]             = "Shadowmoon Valley",
+
+    -- Extra zones used by FarmingData (not in RoutesData zone list)
+    -- EN
+    ["Feralas"]                     = "Feralas",
+    ["Badlands"]                    = "Badlands",
+    ["Dustwallow Marsh"]            = "Dustwallow Marsh",
+    ["Swamp of Sorrows"]            = "Swamp of Sorrows",
+    ["Duskwood"]                    = "Duskwood",
+    ["Silithus"]                    = "Silithus",
+    ["Azshara"]                     = "Azshara",
+    ["Western Plaguelands"]         = "Western Plaguelands",
+    -- FR
+    ["Féralas"]                    = "Feralas",
+    ["Terres ingrates"]             = "Badlands",
+    ["Marécage d'Âprefange"]      = "Dustwallow Marsh",
+    ["Marais des Chagrins"]         = "Swamp of Sorrows",
+    ["Bois de la Pénombre"]        = "Duskwood",
+    ["Silithus"]                    = "Silithus",
+    ["Azshara"]                     = "Azshara",
+    ["Maleterres de l'ouest"]      = "Western Plaguelands",
+    -- DE
+    ["Feralas"]                     = "Feralas",
+    ["Ödland"]                     = "Badlands",
+    ["Düstermarschen"]             = "Dustwallow Marsh",
+    ["Sümpfe des Elends"]          = "Swamp of Sorrows",
+    ["Dämmerwald"]                 = "Duskwood",
+    ["Westliche Pestländer"]       = "Western Plaguelands",
 }
+
+----------------------------------------------------------------------
+-- Reverse locale table: EN key -> localized name per locale
+----------------------------------------------------------------------
+NS.ZoneLocales = {
+    ["frFR"] = {
+        -- Classic
+        ["Tirisfal Glades"]         = "Clairières de Tirisfal",
+        ["Elwynn Forest"]           = "Forêt d'Elwynn",
+        ["Darkshore"]               = "Sombrivage",
+        ["The Barrens"]             = "Les Tarides",
+        ["Silverpine Forest"]       = "Forêt des Pins Argentés",
+        ["Hillsbrad Foothills"]     = "Contreforts de Hillsbrad",
+        ["Wetlands"]                = "Les Paluns",
+        ["Stonetalon Mountains"]    = "Serres-Rocheuses",
+        ["Redridge Mountains"]      = "Les Carmines",
+        ["Stranglethorn Vale"]      = "Vallée de Strangleronce",
+        ["Arathi Highlands"]        = "Hautes-terres d'Arathi",
+        ["Desolace"]                = "Désolace",
+        ["Thousand Needles"]        = "Mille Pointes",
+        ["Searing Gorge"]           = "Steppes ardentes",
+        ["The Hinterlands"]         = "Les Hinterlands",
+        ["Felwood"]                 = "Gangrebois",
+        ["Un'Goro Crater"]          = "Cratère d'Un'Goro",
+        ["Blasted Lands"]           = "Terres Foudroyées",
+        ["Eastern Plaguelands"]     = "Maleterres de l'est",
+        ["Winterspring"]            = "Berceau-de-l'Hiver",
+        ["Burning Steppes"]         = "Steppes Ardentes",
+        -- TBC Outland
+        ["Hellfire Peninsula"]      = "Péninsule des Flammes infernales",
+        ["Zangarmarsh"]             = "Marécage de Zangar",
+        ["Terokkar Forest"]         = "Forêt de Terokkar",
+        ["Blade's Edge Mountains"]  = "Les Tranchantes",
+        ["Netherstorm"]             = "Raz-de-Néant",
+        ["Shadowmoon Valley"]       = "Vallée d'Ombrelune",
+        -- Extra zones (FarmingData)
+        ["Feralas"]                 = "Féralas",
+        ["Badlands"]                = "Terres ingrates",
+        ["Dustwallow Marsh"]        = "Marécage d'Âprefange",
+        ["Swamp of Sorrows"]        = "Marais des Chagrins",
+        ["Duskwood"]                = "Bois de la Pénombre",
+        ["Western Plaguelands"]     = "Maleterres de l'ouest",
+    },
+    ["deDE"] = {
+        -- Classic
+        ["Tirisfal Glades"]         = "Lichtung von Tirisfal",
+        ["Elwynn Forest"]           = "Wald von Elwynn",
+        ["Darkshore"]               = "Dunkelküste",
+        ["The Barrens"]             = "Das Brachland",
+        ["Silverpine Forest"]       = "Silberwald",
+        ["Hillsbrad Foothills"]     = "Vorgebirge des Hügellands",
+        ["Wetlands"]                = "Sumpfland",
+        ["Stonetalon Mountains"]    = "Steinkrallengebirge",
+        ["Redridge Mountains"]      = "Rotkammgebirge",
+        ["Ashenvale"]               = "Eschental",
+        ["Stranglethorn Vale"]      = "Schlingendorntal",
+        ["Arathi Highlands"]        = "Arathihochland",
+        ["Thousand Needles"]        = "Tausend Nadeln",
+        ["Searing Gorge"]           = "Sengende Schlucht",
+        ["The Hinterlands"]         = "Das Hinterland",
+        ["Felwood"]                 = "Teufelswald",
+        ["Un'Goro Crater"]          = "Krater von Un'Goro",
+        ["Blasted Lands"]           = "Verwüstete Lande",
+        ["Eastern Plaguelands"]     = "Östliche Pestländer",
+        ["Winterspring"]            = "Winterquell",
+        ["Burning Steppes"]         = "Brennende Steppe",
+        -- TBC Outland
+        ["Hellfire Peninsula"]      = "Höllenfeuerhalbinsel",
+        ["Zangarmarsh"]             = "Zangarmarschen",
+        ["Terokkar Forest"]         = "Wälder von Terokkar",
+        ["Blade's Edge Mountains"]  = "Schergrat",
+        ["Netherstorm"]             = "Nethersturm",
+        ["Shadowmoon Valley"]       = "Schattenmondtal",
+        -- Extra zones (FarmingData)
+        ["Feralas"]                 = "Feralas",
+        ["Badlands"]                = "Ödland",
+        ["Dustwallow Marsh"]        = "Düstermarschen",
+        ["Swamp of Sorrows"]        = "Sümpfe des Elends",
+        ["Duskwood"]                = "Dämmerwald",
+        ["Western Plaguelands"]     = "Westliche Pestländer",
+    },
+}
+
+function NS.LocalizeZone(key)
+    local locale = GetLocale()
+    local t = NS.ZoneLocales[locale]
+    if t and t[key] then return t[key] end
+    return key  -- fallback: EN name as-is
+end
+
+----------------------------------------------------------------------
+-- Resource name localization: EN key -> localized name per locale
+----------------------------------------------------------------------
+NS.ResourceLocales = {
+    ["frFR"] = {
+        -- Classic Herbs
+        ["Peacebloom / Silverleaf"]  = "Pacifique / Feuillargent",
+        ["Briarthorn / Mageroyal"]   = "Eglantine / Mage royal",
+        ["Stranglekelp"]             = "Etouffante",
+        ["Bruiseweed"]               = "Doulourante",
+        ["Wild Steelbloom"]          = "Aciérite sauvage",
+        ["Grave Moss"]               = "Tombeline",
+        ["Kingsblood"]               = "Sang-royal",
+        ["Liferoot"]                 = "Vietérule",
+        ["Fadeleaf"]                 = "Pâlerette",
+        ["Goldthorn"]                = "Dorépine",
+        ["Khadgar's Whisker"]        = "Moustache de Khadgar",
+        ["Firebloom"]                = "Fleur de feu",
+        ["Sungrass"]                 = "Soleillette",
+        ["Purple Lotus"]             = "Lotus pourpre",
+        ["Blindweed"]                = "Aveuglette",
+        ["Ghost Mushroom"]           = "Champignon fantôme",
+        ["Gromsblood"]               = "Gromsang",
+        ["Golden Sansam"]            = "Sansam doré",
+        ["Dreamfoil"]                = "Feuillerêve",
+        ["Mountain Silversage"]      = "Sauge-argent des montagnes",
+        ["Icecap"]                   = "Calot de glace",
+        ["Sorrowmoss"]               = "Chagrinelle",
+        -- TBC Herbs
+        ["Felweed"]                  = "Gangrelette",
+        ["Dreaming Glory"]           = "Glaurier",
+        ["Terocone"]                 = "Terocône",
+        ["Ragveil"]                  = "Voile-misère",
+        ["Nightmare Vine"]           = "Cauchemardelle",
+        ["Netherbloom"]              = "Néantine",
+        -- Classic Ores
+        ["Copper Ore"]               = "Minerai de cuivre",
+        ["Tin Ore"]                  = "Minerai d'étain",
+        ["Iron Ore"]                 = "Minerai de fer",
+        ["Mithril Ore"]              = "Minerai de mithril",
+        ["Thorium Ore"]              = "Minerai de thorium",
+        -- TBC Ores
+        ["Fel Iron Ore"]             = "Minerai de gangrefer",
+        ["Adamantite Ore"]           = "Minerai d'adamantite",
+    },
+}
+
+function NS.LocalizeResource(key)
+    local locale = GetLocale()
+    local t = NS.ResourceLocales[locale]
+    if t and t[key] then return t[key] end
+    return key  -- fallback: EN name as-is
+end
 
 ----------------------------------------------------------------------
 -- Build sorted list of all zone keys for browsing
