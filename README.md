@@ -88,7 +88,7 @@ The addon supports multiple languages through:
 
 ## Compatibility
 
-- **Interface**: 20504 (TBC Classic 2.5.4)
+- **Interface**: 20504 (TBC Classic 2.5.5)
 - **ElvUI**: Detected and supported (uses `SetTemplate("Transparent")` for frames)
 - **Container API**: Supports both legacy `GetContainerItemInfo` and `C_Container` API
 

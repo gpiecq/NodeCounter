@@ -1,0 +1,45 @@
+name: Package & Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from TOC
+        id: version
+        run: |
+          VERSION=$(grep "^## Version:" NodeCounter.toc | sed 's/## Version: //')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build zip
+        run: |
+          ADDON_NAME="NodeCounter"
+          mkdir -p /tmp/addon-build/$ADDON_NAME/textures
+
+          cp NodeCounter.toc Core.lua GuideData.lua RoutesData.lua Tracking.lua \
+             Counter.lua Routes.lua UI.lua README.md \
+             /tmp/addon-build/$ADDON_NAME/
+
+          cp textures/*.tga /tmp/addon-build/$ADDON_NAME/textures/
+
+          cd /tmp/addon-build
+          zip -r "$GITHUB_WORKSPACE/NodeCounter.zip" $ADDON_NAME
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: NodeCounter v${{ steps.version.outputs.version }}
+          files: NodeCounter.zip
+          generate_release_notes: true
