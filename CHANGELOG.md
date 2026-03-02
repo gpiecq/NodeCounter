@@ -2,6 +2,13 @@
 
 All notable changes to NodeCounter will be documented in this file.
 
+## [1.1.1] - 2026-03-02
+
+### Fixed
+- Fix `SetBackdrop` nil error on Anniversary client: added missing `BackdropTemplate` inheritance to all skinned Button frames (tab buttons, route/guide sub-tabs, browse mode buttons, navigation arrows)
+
+---
+
 ## [1.1.0] - 2026-03-01
 
 ### Added
