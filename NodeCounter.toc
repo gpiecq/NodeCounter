@@ -2,7 +2,7 @@
 ## Title: NodeCounter
 ## Notes: Track herbs & ores on minimap, count harvests by type/zone, set objectives, skill cap alerts
 ## Author: NodeCounter
-## Version: 1.1.0
+## Version: 1.1.1
 ## SavedVariables: NodeCounterDB
 
 Core.lua

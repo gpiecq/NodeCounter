@@ -250,7 +250,7 @@ end
 -- Create a styled tab button
 ----------------------------------------------------------------------
 local function CreateTabButton(parent, label, anchorTo, offsetX)
-    local tab = CreateFrame("Button", nil, parent)
+    local tab = CreateFrame("Button", nil, parent, "BackdropTemplate")
     tab:SetSize(100, 26)
     if anchorTo then
         tab:SetPoint("LEFT", anchorTo, "RIGHT", 4, 0)
@@ -625,7 +625,7 @@ local function CreateMainFrame()
     local currentResourceZoneIdx = 1       -- index in the zones of the current resource
 
     -- Sub-tab buttons (Herbes / Minage)
-    local routeHerbBtn = CreateFrame("Button", nil, routeContainer)
+    local routeHerbBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     routeHerbBtn:SetSize(100, 24)
     routeHerbBtn:SetPoint("TOPLEFT", routeContainer, "TOPLEFT", 6, -6)
     SkinFrame(routeHerbBtn)
@@ -634,7 +634,7 @@ local function CreateMainFrame()
     routeHerbBtn.label:SetPoint("CENTER")
     routeHerbBtn.label:SetText("Herbes")
 
-    local routeMineBtn = CreateFrame("Button", nil, routeContainer)
+    local routeMineBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     routeMineBtn:SetSize(100, 24)
     routeMineBtn:SetPoint("LEFT", routeHerbBtn, "RIGHT", 4, 0)
     SkinFrame(routeMineBtn)
@@ -659,7 +659,7 @@ local function CreateMainFrame()
     end
 
     -- Browse mode toggle buttons (Par zone / Par ressource)
-    local browseZoneBtn = CreateFrame("Button", nil, routeContainer)
+    local browseZoneBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     browseZoneBtn:SetSize(110, 22)
     browseZoneBtn:SetPoint("TOPLEFT", routeHerbBtn, "BOTTOMLEFT", 0, -8)
     SkinFrame(browseZoneBtn)
@@ -668,7 +668,7 @@ local function CreateMainFrame()
     browseZoneBtn.label:SetPoint("CENTER")
     browseZoneBtn.label:SetText("Par zone")
 
-    local browseResBtn = CreateFrame("Button", nil, routeContainer)
+    local browseResBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     browseResBtn:SetSize(110, 22)
     browseResBtn:SetPoint("LEFT", browseZoneBtn, "RIGHT", 4, 0)
     SkinFrame(browseResBtn)
@@ -692,7 +692,7 @@ local function CreateMainFrame()
     end
 
     -- Resource zone sub-navigation (shown in resource mode)
-    local resZonePrevBtn = CreateFrame("Button", nil, routeContainer)
+    local resZonePrevBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     resZonePrevBtn:SetSize(16, 16)
     SkinFrame(resZonePrevBtn)
     resZonePrevBtn.label = resZonePrevBtn:CreateFontString(nil, "OVERLAY")
@@ -702,7 +702,7 @@ local function CreateMainFrame()
     resZonePrevBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
     resZonePrevBtn:Hide()
 
-    local resZoneNextBtn = CreateFrame("Button", nil, routeContainer)
+    local resZoneNextBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     resZoneNextBtn:SetSize(16, 16)
     SkinFrame(resZoneNextBtn)
     resZoneNextBtn.label = resZoneNextBtn:CreateFontString(nil, "OVERLAY")
@@ -719,7 +719,7 @@ local function CreateMainFrame()
     resZoneNameText:Hide()
 
     -- Zone navigation: zone name + prev/next arrows
-    local zonePrevBtn = CreateFrame("Button", nil, routeContainer)
+    local zonePrevBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     zonePrevBtn:SetSize(20, 20)
     zonePrevBtn:SetPoint("TOPLEFT", browseZoneBtn, "BOTTOMLEFT", 0, -8)
     SkinFrame(zonePrevBtn)
@@ -729,7 +729,7 @@ local function CreateMainFrame()
     zonePrevBtn.label:SetText("<")
     zonePrevBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
 
-    local zoneNextBtn = CreateFrame("Button", nil, routeContainer)
+    local zoneNextBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
     zoneNextBtn:SetSize(20, 20)
     zoneNextBtn:SetPoint("TOP", browseZoneBtn, "BOTTOM", 0, -8)
     zoneNextBtn:SetPoint("RIGHT", routeContainer, "RIGHT", -6, 0)
@@ -1484,7 +1484,7 @@ local function CreateMainFrame()
     local activeGuideSubTab = "herbs"
 
     -- Sub-tab buttons (Herbes / Minage)
-    local guideHerbBtn = CreateFrame("Button", nil, guideContainer)
+    local guideHerbBtn = CreateFrame("Button", nil, guideContainer, "BackdropTemplate")
     guideHerbBtn:SetSize(100, 24)
     guideHerbBtn:SetPoint("TOPLEFT", guideContainer, "TOPLEFT", 6, -6)
     SkinFrame(guideHerbBtn)
@@ -1493,7 +1493,7 @@ local function CreateMainFrame()
     guideHerbBtn.label:SetPoint("CENTER")
     guideHerbBtn.label:SetText("Herbes")
 
-    local guideMineBtn = CreateFrame("Button", nil, guideContainer)
+    local guideMineBtn = CreateFrame("Button", nil, guideContainer, "BackdropTemplate")
     guideMineBtn:SetSize(100, 24)
     guideMineBtn:SetPoint("LEFT", guideHerbBtn, "RIGHT", 4, 0)
     SkinFrame(guideMineBtn)
