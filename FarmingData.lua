@@ -346,6 +346,41 @@ NS.FarmingData = {
             { zone = "Shadowmoon Valley",  texture = TEX .. "adamantite-ore-shadowmoon" },
         },
     },
+    -----------------------------------------------------------------
+    -- TBC GAS CLOUDS
+    -----------------------------------------------------------------
+    {
+        name = "Windy Cloud",
+        type = "gases",
+        skillRange = "305+",
+        zones = {
+            { zone = "Nagrand", texture = TEX .. "windy-cloud-nagrand" },
+        },
+    },
+    {
+        name = "Swamp Gas",
+        type = "gases",
+        skillRange = "305+",
+        zones = {
+            { zone = "Zangarmarsh", texture = TEX .. "swamp-gas-zangarmarsh" },
+        },
+    },
+    {
+        name = "Felmist",
+        type = "gases",
+        skillRange = "305+",
+        zones = {
+            { zone = "Shadowmoon Valley", texture = TEX .. "felmist-shadowmoon" },
+        },
+    },
+    {
+        name = "Arcane Vortex",
+        type = "gases",
+        skillRange = "305+",
+        zones = {
+            { zone = "Netherstorm", texture = TEX .. "arcane-vortex-netherstorm" },
+        },
+    },
 }
 
 ----------------------------------------------------------------------
@@ -353,11 +388,14 @@ NS.FarmingData = {
 ----------------------------------------------------------------------
 NS.FarmingHerbList = {}
 NS.FarmingMiningList = {}
+NS.FarmingGasList = {}
 
 for i, entry in ipairs(NS.FarmingData) do
     if entry.type == "herbs" then
         NS.FarmingHerbList[#NS.FarmingHerbList + 1] = i
     elseif entry.type == "mining" then
         NS.FarmingMiningList[#NS.FarmingMiningList + 1] = i
+    elseif entry.type == "gases" then
+        NS.FarmingGasList[#NS.FarmingGasList + 1] = i
     end
 end

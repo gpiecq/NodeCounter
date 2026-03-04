@@ -22,19 +22,26 @@ A World of Warcraft TBC Classic (2.5.5) addon for tracking gathering professions
 - Multi-language support (EN, FR, DE, ES)
 
 ### Routes
-Two browsing modes with 150+ route maps:
+Three sub-tabs (Herbs / Mining / Gas) with 150+ route maps:
 
-**Zone Mode** (51 zone maps)
+**Zone Mode** (55 zone maps)
 - Visual farming route maps overlaid on zone maps
 - Browse all zones with prev/next navigation or dropdown
-- Filter by Herbs or Mining sub-tab
+- Filter by Herbs, Mining, or Gas sub-tab
 - **Classic zones** (1-300): 19 herbalism + 21 mining routes
-- **TBC Outland zones** (300-375): 5 herbalism + 6 mining routes
+- **TBC Outland zones** (300-375): 5 herbalism + 6 mining + 4 gas cloud routes
 
 **Resource Mode** (100+ farming maps)
-- Browse routes by specific resource (e.g. Dreamfoil, Thorium Ore)
+- Browse routes by specific resource (e.g. Dreamfoil, Thorium Ore, Windy Cloud)
 - Multiple zone options per resource with sub-navigation
-- 22 herb resources and 7 ore resources with dedicated maps
+- 22 herb resources, 7 ore resources, and 4 gas cloud resources with dedicated maps
+
+**Gas Clouds** (TBC Engineering 305+)
+- Windy Cloud (Nagrand) — Mote of Air
+- Swamp Gas (Zangarmarsh) — Mote of Water
+- Felmist (Shadowmoon Valley) — Mote of Shadow
+- Arcane Vortex (Netherstorm) — Mote of Mana
+- Spawn data sourced from GatherMate2 and CavernOfTime databases
 
 **Navigation**
 - Player position dot tracking in real-time
@@ -85,7 +92,7 @@ Two browsing modes with 150+ route maps:
 | `Counter.lua` | Harvest detection, bag scanning, skill monitoring |
 | `GuideData.lua` | Leveling guide data (skill brackets 1-375) |
 | `RoutesData.lua` | Route map definitions, zone aliases, localization tables |
-| `FarmingData.lua` | Per-resource farming route data (herbs and ores) |
+| `FarmingData.lua` | Per-resource farming route data (herbs, ores, gas clouds) |
 | `Routes.lua` | Navigation engine (player position tracking) |
 | `UI.lua` | All UI: minimap button, main window, settings, guide |
 | `textures/` | Zone route maps (TGA 512x256 32-bit) |
@@ -111,6 +118,7 @@ The addon supports multiple languages through:
 ## Credits & Sources
 
 - Route maps sourced from [wow-professions.com](https://www.wow-professions.com/tbc/herbalism-leveling-guide-tbc-classic) (Classic and TBC leveling guides)
+- Gas cloud spawn data from [GatherMate2](https://github.com/Nevcairiel/GatherMate2_Data) and [CavernOfTime TBC database](http://tbc.cavernoftime.com/)
 - Leveling guide data compiled from:
   - [wow-professions.com](https://www.wow-professions.com/) - Herbalism and Mining 1-375 leveling guides
   - [taspas1po.fr](https://taspas1po.fr/) - TBC Herbalism and Mining guides (French)

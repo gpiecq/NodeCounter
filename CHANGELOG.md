@@ -2,6 +2,25 @@
 
 All notable changes to NodeCounter will be documented in this file.
 
+## [1.2.0] - 2026-03-04
+
+### Added
+
+#### Gas Cloud Routes (Routes Tab)
+- New **Gas** sub-tab in Routes tab alongside Herbs and Mining
+- 4 gas cloud resources: Windy Cloud (Nagrand), Swamp Gas (Zangarmarsh), Felmist (Shadowmoon Valley), Arcane Vortex (Netherstorm)
+- 8 route maps generated from GatherMate2/CavernOfTime spawn data (zone + farming views)
+- Gas cloud spawn points displayed as purple markers with connecting route lines on darkened zone backgrounds
+- French localization for gas cloud names (Nuage venteux, Gaz des marais, Brume gangrénée, Vortex arcanique)
+- `NS.FarmingGasList` index for gas cloud resource browsing
+- Purple accent color (`gasPurple`) for Gas sub-tab highlight
+
+### Changed
+- `Routes:ZoneHasRoute()` now accepts zone entries without a texture path (shows "Pas de route" gracefully)
+- Version bumped to 1.2.0
+
+---
+
 ## [1.1.1] - 2026-03-02
 
 ### Fixed
