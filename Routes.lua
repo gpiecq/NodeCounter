@@ -73,7 +73,7 @@ end
 function Routes:ZoneHasRoute(zoneKey, routeType)
     local zd = NS.RoutesData[zoneKey]
     if not zd then return false end
-    return zd[routeType] and zd[routeType].texture and true or false
+    return zd[routeType] and true or false
 end
 
 ----------------------------------------------------------------------

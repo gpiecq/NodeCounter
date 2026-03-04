@@ -172,6 +172,7 @@ NS.RoutesData = {
     ["Zangarmarsh"] = {
         faction = "both", skillRange = "325-350",
         mining = { texture = TEX .. "zangarmarsh-minage" },
+        gases  = { texture = TEX .. "zangarmarsh-gases" },
     },
     ["Terokkar Forest"] = {
         faction = "both", skillRange = "325-350",
@@ -182,6 +183,7 @@ NS.RoutesData = {
         faction = "both", skillRange = "315-375",
         herbs  = { texture = TEX .. "nagrand-herbo" },
         mining = { texture = TEX .. "nagrand-minage" },
+        gases  = { texture = TEX .. "nagrand-gases" },
     },
     ["Blade's Edge Mountains"] = {
         faction = "both", skillRange = "315-325",
@@ -191,10 +193,12 @@ NS.RoutesData = {
         faction = "both", skillRange = "350-375",
         herbs  = { texture = TEX .. "netherstorm-herbo" },
         mining = { texture = TEX .. "netherstorm-minage" },
+        gases  = { texture = TEX .. "netherstorm-gases" },
     },
     ["Shadowmoon Valley"] = {
         faction = "both", skillRange = "350-375",
         mining = { texture = TEX .. "shadowmoon-minage" },
+        gases  = { texture = TEX .. "shadowmoon-gases" },
     },
 }
 
@@ -457,6 +461,11 @@ NS.ResourceLocales = {
         -- TBC Ores
         ["Fel Iron Ore"]             = "Minerai de gangrefer",
         ["Adamantite Ore"]           = "Minerai d'adamantite",
+        -- TBC Gas Clouds
+        ["Windy Cloud"]              = "Nuage venteux",
+        ["Swamp Gas"]                = "Gaz des marais",
+        ["Felmist"]                  = "Brume gangrénée",
+        ["Arcane Vortex"]            = "Vortex arcanique",
     },
 }
 

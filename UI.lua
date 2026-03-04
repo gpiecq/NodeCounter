@@ -23,6 +23,7 @@ local COLOURS = {
     white      = { 1, 1, 1, 1 },
     dimWhite   = { 0.7, 0.7, 0.7, 1 },
     routeCyan  = { 0.0,  0.86, 1.0,  1    },
+    gasPurple  = { 0.7,  0.4,  1.0,  1    },
 }
 
 ----------------------------------------------------------------------
@@ -643,18 +644,34 @@ local function CreateMainFrame()
     routeMineBtn.label:SetPoint("CENTER")
     routeMineBtn.label:SetText("Minage")
 
+    local routeGasBtn = CreateFrame("Button", nil, routeContainer, "BackdropTemplate")
+    routeGasBtn:SetSize(100, 24)
+    routeGasBtn:SetPoint("LEFT", routeMineBtn, "RIGHT", 4, 0)
+    SkinFrame(routeGasBtn)
+    routeGasBtn.label = routeGasBtn:CreateFontString(nil, "OVERLAY")
+    routeGasBtn.label:SetFont(GetFont(), 10, "OUTLINE")
+    routeGasBtn.label:SetPoint("CENTER")
+    routeGasBtn.label:SetText("Gaz")
+
     -- Sub-tab selection visuals
     local function UpdateRouteSubTabs()
+        -- Reset all to default
+        routeHerbBtn:SetBackdropBorderColor(unpack(COLOURS.border))
+        routeHerbBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+        routeMineBtn:SetBackdropBorderColor(unpack(COLOURS.border))
+        routeMineBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+        routeGasBtn:SetBackdropBorderColor(unpack(COLOURS.border))
+        routeGasBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+        -- Highlight active
         if activeRouteSubTab == "herbs" then
             routeHerbBtn:SetBackdropBorderColor(unpack(COLOURS.herbGreen))
             routeHerbBtn.label:SetTextColor(unpack(COLOURS.herbGreen))
-            routeMineBtn:SetBackdropBorderColor(unpack(COLOURS.border))
-            routeMineBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
-        else
-            routeHerbBtn:SetBackdropBorderColor(unpack(COLOURS.border))
-            routeHerbBtn.label:SetTextColor(unpack(COLOURS.dimWhite))
+        elseif activeRouteSubTab == "mining" then
             routeMineBtn:SetBackdropBorderColor(unpack(COLOURS.oreYellow))
             routeMineBtn.label:SetTextColor(unpack(COLOURS.oreYellow))
+        elseif activeRouteSubTab == "gases" then
+            routeGasBtn:SetBackdropBorderColor(unpack(COLOURS.gasPurple))
+            routeGasBtn.label:SetTextColor(unpack(COLOURS.gasPurple))
         end
     end
 
@@ -1049,6 +1066,8 @@ local function CreateMainFrame()
     local function GetCurrentFarmingList()
         if activeRouteSubTab == "herbs" then
             return NS.FarmingHerbList or {}
+        elseif activeRouteSubTab == "gases" then
+            return NS.FarmingGasList or {}
         else
             return NS.FarmingMiningList or {}
         end
@@ -1371,6 +1390,7 @@ local function CreateMainFrame()
 
     routeHerbBtn:SetScript("OnClick", function() SwitchRouteSubTab("herbs") end)
     routeMineBtn:SetScript("OnClick", function() SwitchRouteSubTab("mining") end)
+    routeGasBtn:SetScript("OnClick", function() SwitchRouteSubTab("gases") end)
     routeHerbBtn:SetScript("OnEnter", function(self)
         if activeRouteSubTab ~= "herbs" then self:SetBackdropColor(0.25, 0.25, 0.25, 1) end
     end)
@@ -1382,6 +1402,12 @@ local function CreateMainFrame()
     end)
     routeMineBtn:SetScript("OnLeave", function(self)
         if activeRouteSubTab ~= "mining" then self:SetBackdropColor(unpack(COLOURS.bg)) end
+    end)
+    routeGasBtn:SetScript("OnEnter", function(self)
+        if activeRouteSubTab ~= "gases" then self:SetBackdropColor(0.25, 0.25, 0.25, 1) end
+    end)
+    routeGasBtn:SetScript("OnLeave", function(self)
+        if activeRouteSubTab ~= "gases" then self:SetBackdropColor(unpack(COLOURS.bg)) end
     end)
 
     zonePrevBtn:SetScript("OnClick", function() NavigateZone(-1) end)
@@ -1953,6 +1979,8 @@ local function CreateMainFrame()
                 local last = NS.db.settings.routes.lastType
                 if last == "mining" then
                     activeRouteSubTab = "mining"
+                elseif last == "gases" then
+                    activeRouteSubTab = "gases"
                 else
                     activeRouteSubTab = "herbs"
                 end
