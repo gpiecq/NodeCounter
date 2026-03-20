@@ -2,6 +2,39 @@
 
 All notable changes to NodeCounter will be documented in this file.
 
+## [1.3.0] - 2026-03-20
+
+### Added
+
+#### Minimap Right-Click Tracking Menu
+- Right-click on the minimap button now opens a dropdown menu instead of cycling through modes
+- Three options with icons and checkmarks: Herbalism, Mining, Auto-Switch
+- Menu options adapt to available professions (Auto-Switch only shown if both professions exist)
+- Localized menu labels (FR, EN, DE, ES)
+- Chat confirmation message when switching mode
+
+#### Zone Resource Info Panel (Routes Tab)
+- New resource info panel below the route map in zone browse mode
+- Shows all gatherable resources available in the currently displayed zone with skill ranges
+- Scrollable list with mousewheel support for zones with many resources
+- Color-coded by resource type (green herbs, yellow ores, purple gases)
+- Localized header ("Ressources disponibles" on FR client)
+
+#### Extended Zone Resource Data
+- `NS.ZoneResources` inverse lookup table mapping zones to their available resources
+- Supplementary resource data for all Classic and TBC zones (starting zones through Outland)
+- Covers resources without dedicated farming route maps
+
+### Fixed
+- **Auto-switch combat pause**: fixed `PLAYER_REGEN_DISABLED`/`PLAYER_REGEN_ENABLED` events being silently ignored because the `ADDON_LOADED` callback overwrote the OnEvent handler — unified into a single event handler
+
+### Changed
+- Minimap tooltip updated: "Right-click: Tracking menu" (was "Cycle mode")
+- Added missing French resource translations: Earthroot, Plaguebloom, Mana Thistle, Silver Ore, Gold Ore, Truesilver Ore, Dark Iron Ore, Khorium Ore
+- Version bumped to 1.3.0
+
+---
+
 ## [1.2.0] - 2026-03-04
 
 ### Added

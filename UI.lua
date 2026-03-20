@@ -151,13 +151,74 @@ local function CreateMinimapButton()
         self:SetScript("OnUpdate", nil)
     end)
 
+    -- Right-click dropdown menu
+    local dropdownFrame = CreateFrame("Frame", "NodeCounterMinimapDropdown", UIParent, "UIDropDownMenuTemplate")
+
+    local MENU_LABELS = {
+        herbs    = { frFR = "Herboristerie",  deDE = "Kr\195\164uterkunde",  esES = "Herbalismo",   enUS = "Herbalism"   },
+        minerals = { frFR = "Minage",         deDE = "Bergbau",              esES = "Miner\195\173a", enUS = "Mining"      },
+        auto     = { frFR = "Auto-Switch",    deDE = "Auto-Wechsel",         esES = "Auto-Cambio",  enUS = "Auto-Switch" },
+    }
+    local loc = GetLocale()
+    local function MenuLabel(key)
+        local t = MENU_LABELS[key]
+        return t and (t[loc] or t.enUS) or key
+    end
+
+    local function InitMinimapDropdown(frame, level)
+        local currentMode = NS.db and NS.db.settings.trackingMode or "auto"
+        local hasHerbs, hasMinerals = NS.Tracking:HasTrackingTypes()
+
+        if hasHerbs then
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = MenuLabel("herbs")
+            info.icon = "Interface\\Icons\\INV_Misc_Flower_02"
+            info.checked = (currentMode == "herbs")
+            info.func = function()
+                NS.db.settings.trackingMode = "herbs"
+                NS:FireCallback("TRACKING_MODE_CHANGED", "herbs")
+                print("|cff00ccffNodeCounter:|r Tracking \226\134\146 |cff44ff44" .. MenuLabel("herbs") .. "|r")
+            end
+            UIDropDownMenu_AddButton(info)
+        end
+
+        if hasMinerals then
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = MenuLabel("minerals")
+            info.icon = "Interface\\Icons\\INV_Pick_02"
+            info.checked = (currentMode == "minerals")
+            info.func = function()
+                NS.db.settings.trackingMode = "minerals"
+                NS:FireCallback("TRACKING_MODE_CHANGED", "minerals")
+                print("|cff00ccffNodeCounter:|r Tracking \226\134\146 |cffffcc00" .. MenuLabel("minerals") .. "|r")
+            end
+            UIDropDownMenu_AddButton(info)
+        end
+
+        if hasHerbs and hasMinerals then
+            local info = UIDropDownMenu_CreateInfo()
+            info.text = MenuLabel("auto")
+            info.icon = "Interface\\Icons\\Spell_Nature_WispSplode"
+            info.checked = (currentMode == "auto")
+            info.func = function()
+                NS.db.settings.trackingMode = "auto"
+                NS:FireCallback("TRACKING_MODE_CHANGED", "auto")
+                print("|cff00ccffNodeCounter:|r Tracking \226\134\146 |cff00ccff" .. MenuLabel("auto") .. "|r")
+            end
+            UIDropDownMenu_AddButton(info)
+        end
+    end
+
+    UIDropDownMenu_Initialize(dropdownFrame, InitMinimapDropdown, "MENU")
+
     -- Clicks
     btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     btn:SetScript("OnClick", function(self, button)
         if button == "LeftButton" then
             NS:FireCallback("TOGGLE_WINDOW")
         elseif button == "RightButton" then
-            NS.Tracking:CycleMode()
+            GameTooltip:Hide()
+            ToggleDropDownMenu(1, nil, dropdownFrame, self, 0, 0)
         end
     end)
 
@@ -195,7 +256,7 @@ local function CreateMinimapButton()
         GameTooltip:AddDoubleLine("Minerais (sacs):", tostring(so), 1.0, 0.8, 0.27, 1, 1, 1)
         GameTooltip:AddLine(" ")
         GameTooltip:AddLine("Left-click: Toggle window", 0.7, 0.7, 0.7)
-        GameTooltip:AddLine("Right-click: Cycle mode", 0.7, 0.7, 0.7)
+        GameTooltip:AddLine("Right-click: Tracking menu", 0.7, 0.7, 0.7)
         GameTooltip:AddLine("Drag: Move button", 0.7, 0.7, 0.7)
         GameTooltip:Show()
     end)
@@ -822,6 +883,98 @@ local function CreateMainFrame()
     oozText:SetText("Hors zone")
     oozText:Hide()
 
+    -- Resource info panel (shown under map in zone mode, scrollable)
+    local MAX_RES_VISIBLE = 5   -- max visible lines at once
+    local RES_LINE_H      = 14
+    local RES_HEADER_H    = 16
+    local resScrollOffset  = 0
+    local resScrollTotal   = 0
+    local resCurrentList   = nil
+    local resCurrentColour = nil
+
+    local resInfoFrame = CreateFrame("Frame", nil, routeContainer)
+    resInfoFrame:SetPoint("TOPLEFT", mapFrame, "BOTTOMLEFT", 0, -4)
+    resInfoFrame:SetPoint("TOPRIGHT", mapFrame, "BOTTOMRIGHT", 0, -4)
+    resInfoFrame:SetHeight(RES_HEADER_H + MAX_RES_VISIBLE * RES_LINE_H)
+    resInfoFrame:Hide()
+
+    local resInfoHeaderLocales = {
+        frFR = "Ressources disponibles",
+        deDE = "Verf\195\188gbare Ressourcen",
+    }
+    local resInfoHeaderText = resInfoFrame:CreateFontString(nil, "OVERLAY")
+    resInfoHeaderText:SetFont(GetFont(), 10, "OUTLINE")
+    resInfoHeaderText:SetPoint("TOPLEFT", resInfoFrame, "TOPLEFT", 2, 0)
+    resInfoHeaderText:SetTextColor(unpack(COLOURS.dimWhite))
+    resInfoHeaderText:SetText(resInfoHeaderLocales[GetLocale()] or "Available Resources")
+
+    -- Scrollbar (thin slider, right side)
+    local resScrollBar = CreateFrame("Slider", nil, resInfoFrame)
+    resScrollBar:SetWidth(8)
+    resScrollBar:SetPoint("TOPRIGHT", resInfoFrame, "TOPRIGHT", 0, -RES_HEADER_H)
+    resScrollBar:SetPoint("BOTTOMRIGHT", resInfoFrame, "BOTTOMRIGHT", 0, 0)
+    resScrollBar:SetOrientation("VERTICAL")
+    resScrollBar:SetMinMaxValues(0, 1)
+    resScrollBar:SetValueStep(1)
+    local resScrollThumb = resScrollBar:CreateTexture(nil, "OVERLAY")
+    resScrollThumb:SetTexture("Interface\\Buttons\\WHITE8x8")
+    resScrollThumb:SetVertexColor(0.5, 0.5, 0.5, 0.6)
+    resScrollThumb:SetSize(6, 20)
+    resScrollBar:SetThumbTexture(resScrollThumb)
+    resScrollBar:Hide()
+
+    local resLines = {}
+    for i = 1, MAX_RES_VISIBLE do
+        local line = {}
+        local yOff = -(RES_HEADER_H + (i - 1) * RES_LINE_H)
+        line.name = resInfoFrame:CreateFontString(nil, "OVERLAY")
+        line.name:SetFont(GetFont(), 10, "")
+        line.name:SetPoint("TOPLEFT", resInfoFrame, "TOPLEFT", 4, yOff)
+        line.name:SetJustifyH("LEFT")
+
+        line.skill = resInfoFrame:CreateFontString(nil, "OVERLAY")
+        line.skill:SetFont(GetFont(), 10, "")
+        line.skill:SetPoint("TOPRIGHT", resInfoFrame, "TOPRIGHT", -12, yOff)
+        line.skill:SetJustifyH("RIGHT")
+
+        line.name:Hide()
+        line.skill:Hide()
+        resLines[i] = line
+    end
+
+    -- Update visible line content from scroll offset
+    local function UpdateResourceInfoLines()
+        if not resCurrentList then return end
+        for i = 1, MAX_RES_VISIBLE do
+            local dataIdx = resScrollOffset + i
+            local line = resLines[i]
+            if dataIdx <= #resCurrentList then
+                line.name:SetText(NS.LocalizeResource(resCurrentList[dataIdx].name))
+                line.name:SetTextColor(unpack(resCurrentColour))
+                line.skill:SetText(resCurrentList[dataIdx].skillRange)
+                line.skill:SetTextColor(unpack(COLOURS.dimWhite))
+                line.name:Show()
+                line.skill:Show()
+            else
+                line.name:Hide()
+                line.skill:Hide()
+            end
+        end
+    end
+
+    resScrollBar:SetScript("OnValueChanged", function(_, value)
+        resScrollOffset = math.floor(value + 0.5)
+        UpdateResourceInfoLines()
+    end)
+
+    resInfoFrame:EnableMouseWheel(true)
+    resInfoFrame:SetScript("OnMouseWheel", function(_, delta)
+        local maxOff = resScrollTotal - MAX_RES_VISIBLE
+        if maxOff <= 0 then return end
+        resScrollOffset = math.max(0, math.min(maxOff, resScrollOffset - delta))
+        resScrollBar:SetValue(resScrollOffset)
+    end)
+
     -- Info line (coordinates)
     local infoText = routeContainer:CreateFontString(nil, "OVERLAY")
     infoText:SetFont(GetFont(), 10, "")
@@ -1083,10 +1236,53 @@ local function CreateMainFrame()
     end
 
     -------------------------------------------------------------------
+    -- Resource info panel update (zone mode only)
+    -------------------------------------------------------------------
+    local RES_NAME_COLOURS = {
+        herbs  = COLOURS.herbGreen,
+        mining = COLOURS.oreYellow,
+        gases  = COLOURS.gasPurple,
+    }
+
+    local function UpdateResourceInfoPanel()
+        if routeBrowseMode ~= "zone" or not currentRouteZone then
+            resInfoFrame:Hide()
+            return
+        end
+
+        local zoneRes = NS.ZoneResources and NS.ZoneResources[currentRouteZone]
+        local list = zoneRes and zoneRes[activeRouteSubTab]
+        if not list or #list == 0 then
+            resInfoFrame:Hide()
+            return
+        end
+
+        resCurrentList   = list
+        resCurrentColour = RES_NAME_COLOURS[activeRouteSubTab] or COLOURS.dimWhite
+        resScrollTotal   = #list
+        resScrollOffset  = 0
+
+        local visibleCount = math.min(#list, MAX_RES_VISIBLE)
+        resInfoFrame:SetHeight(RES_HEADER_H + visibleCount * RES_LINE_H)
+
+        if #list > MAX_RES_VISIBLE then
+            resScrollBar:SetMinMaxValues(0, #list - MAX_RES_VISIBLE)
+            resScrollBar:SetValue(0)
+            resScrollBar:Show()
+        else
+            resScrollBar:Hide()
+        end
+
+        UpdateResourceInfoLines()
+        resInfoFrame:Show()
+    end
+
+    -------------------------------------------------------------------
     -- Unified display update
     -------------------------------------------------------------------
     local function UpdateRouteDisplay()
         HideDropdown()
+        UpdateResourceInfoPanel()
 
         if routeBrowseMode == "resource" then
             -- Resource mode: show resource name in main nav, zone in sub-nav

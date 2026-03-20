@@ -212,6 +212,34 @@ end
 -- Init on addon loaded
 ----------------------------------------------------------------------
 local initFrame = CreateFrame("Frame")
+local pausedByCombat = false
+
+initFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+initFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+
+initFrame:SetScript("OnEvent", function(self, event, ...)
+    if event == "PLAYER_ENTERING_WORLD" then
+        C_Timer.After(1, function()
+            Tracking:ScanTrackingTypes()
+            Tracking:ApplyMode()
+        end)
+    elseif event == "PLAYER_REGEN_DISABLED" then
+        if ticker then
+            ticker:Cancel()
+            ticker = nil
+            pausedByCombat = true
+        end
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        if pausedByCombat then
+            pausedByCombat = false
+            C_Timer.After(1, function()
+                if not InCombatLockdown() then
+                    Tracking:ApplyMode()
+                end
+            end)
+        end
+    end
+end)
 
 NS:RegisterCallback("ADDON_LOADED", function()
     Tracking:ScanTrackingTypes()
@@ -219,16 +247,7 @@ NS:RegisterCallback("ADDON_LOADED", function()
         Tracking:ScanTrackingTypes()
         Tracking:ApplyMode()
     end)
-
-    -- Re-apply tracking after every loading screen (zone change, dungeon, etc.)
     initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    initFrame:SetScript("OnEvent", function()
-        C_Timer.After(1, function()
-            Tracking:ScanTrackingTypes()
-            -- Re-apply current mode; for "auto" this restarts the ticker
-            Tracking:ApplyMode()
-        end)
-    end)
 end)
 
 NS:RegisterCallback("TRACKING_MODE_CHANGED", function(mode)

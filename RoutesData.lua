@@ -452,15 +452,23 @@ NS.ResourceLocales = {
         ["Ragveil"]                  = "Voile-misère",
         ["Nightmare Vine"]           = "Cauchemardelle",
         ["Netherbloom"]              = "Néantine",
+        ["Earthroot"]                = "Terrestre",
+        ["Plaguebloom"]              = "Fleur du Fléau",
+        ["Mana Thistle"]             = "Chardon de mana",
         -- Classic Ores
         ["Copper Ore"]               = "Minerai de cuivre",
         ["Tin Ore"]                  = "Minerai d'étain",
+        ["Silver Ore"]               = "Minerai d'argent",
         ["Iron Ore"]                 = "Minerai de fer",
+        ["Gold Ore"]                 = "Minerai d'or",
         ["Mithril Ore"]              = "Minerai de mithril",
+        ["Truesilver Ore"]           = "Minerai de vrai-argent",
+        ["Dark Iron Ore"]            = "Minerai de sombrefer",
         ["Thorium Ore"]              = "Minerai de thorium",
         -- TBC Ores
         ["Fel Iron Ore"]             = "Minerai de gangrefer",
         ["Adamantite Ore"]           = "Minerai d'adamantite",
+        ["Khorium Ore"]              = "Minerai de khorium",
         -- TBC Gas Clouds
         ["Windy Cloud"]              = "Nuage venteux",
         ["Swamp Gas"]                = "Gaz des marais",
